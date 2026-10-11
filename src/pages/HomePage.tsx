@@ -12,9 +12,9 @@ import { BackgroundSky3D } from '../components/backgrounds/BackgroundSky3D'
 import { PageTransition } from '../components/PageTransition'
 
 const ROLES = [
-  'FULL STACK DEVELOPER',
-  'AI ENGINEER',
   'SOFTWARE ENGINEER',
+  'AI ENGINEER',
+  'DATA ENGINEER',
 ] as const
 
 export function HomePage() {
@@ -68,13 +68,13 @@ export function HomePage() {
   // Pointer-responsive subtle 3D tilt on the role card
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
-  const springConfig = { damping: 25, stiffness: 140 }
+  const springConfig = { damping: 22, stiffness: 160 }
   const tiltX = useSpring(
-    useTransform(mouseY, [-0.5, 0.5], [4, -4]),
+    useTransform(mouseY, [-0.5, 0.5], [6, -6]),
     springConfig,
   )
   const tiltY = useSpring(
-    useTransform(mouseX, [-0.5, 0.5], [-4, 4]),
+    useTransform(mouseX, [-0.5, 0.5], [-6, 6]),
     springConfig,
   )
 
@@ -264,62 +264,98 @@ export function HomePage() {
                 />
               </AnimatePresence>
 
-              <h1 className="m-0 p-0 text-center relative flex items-center justify-center overflow-visible w-full [transform-style:preserve-3d]">
+              <h1
+                aria-label={ROLES[roleIndex]}
+                className="m-0 p-0 text-center relative flex items-center justify-center overflow-visible w-full [transform-style:preserve-3d]"
+              >
                 <AnimatePresence mode="popLayout">
                   <motion.div
                     key={roleIndex}
-                    initial={
-                      reducedMotion
-                        ? { opacity: 0 }
-                        : {
-                          opacity: 0,
-                          y: 38,
-                          rotateX: -70,
-                          z: -45,
-                          filter: 'blur(4px)',
-                        }
-                    }
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      rotateX: 0,
-                      z: 15,
-                      filter: 'blur(0px)',
-                    }}
-                    exit={
-                      reducedMotion
-                        ? { opacity: 0 }
-                        : {
-                          opacity: 0,
-                          y: -38,
-                          rotateX: 70,
-                          z: -45,
-                          filter: 'blur(4px)',
-                          transition: { duration: 0.35, ease: 'easeIn' },
-                        }
-                    }
-                    transition={{
-                      duration: reducedMotion ? 0.3 : 0.72,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
+                    aria-hidden="true"
+                    className="inline-flex items-center justify-center text-center font-heading font-bold text-white uppercase whitespace-nowrap select-none [transform-style:preserve-3d]"
                     style={{
-                      transformStyle: 'preserve-3d',
-                      transformOrigin: 'center center -30px',
-                      backfaceVisibility: 'hidden',
-                      WebkitFontSmoothing: 'antialiased',
+                      perspective: 1000,
                     }}
-                    className="inline-flex items-center justify-center text-center font-heading font-bold text-white uppercase whitespace-nowrap select-none"
                   >
-                    <span
-                      className="text-white drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] tracking-[0.03em]"
-                      style={{
-                        fontSize: 'clamp(2rem, 3.8vw, 3.15rem)',
-                        lineHeight: 1.15,
-                        transform: 'translateZ(20px)',
-                      }}
-                    >
-                      {ROLES[roleIndex]}
-                    </span>
+                    {ROLES[roleIndex].split('').map((char, charIdx) => {
+                      if (char === ' ') {
+                        return (
+                          <span
+                            key={`space-${roleIndex}-${charIdx}`}
+                            className="inline-block"
+                            style={{ width: '0.34em' }}
+                          >
+                            {'\u00A0'}
+                          </span>
+                        )
+                      }
+                      return (
+                        <motion.span
+                          key={`char-${roleIndex}-${charIdx}`}
+                          initial={
+                            reducedMotion
+                              ? { opacity: 0 }
+                              : {
+                                opacity: 0,
+                                y: 44,
+                                rotateX: -90,
+                                z: -40,
+                                scale: 0.85,
+                                filter: 'blur(4px)',
+                              }
+                          }
+                          animate={{
+                            opacity: 1,
+                            y: 0,
+                            rotateX: 0,
+                            z: 22,
+                            scale: 1,
+                            filter: 'blur(0px)',
+                          }}
+                          exit={
+                            reducedMotion
+                              ? { opacity: 0 }
+                              : {
+                                opacity: 0,
+                                y: -42,
+                                rotateX: 90,
+                                z: -40,
+                                scale: 0.85,
+                                filter: 'blur(4px)',
+                                transition: {
+                                  duration: 0.28,
+                                  delay: charIdx * 0.012,
+                                  ease: 'easeIn',
+                                },
+                              }
+                          }
+                          transition={{
+                            type: 'spring',
+                            stiffness: 135,
+                            damping: 14,
+                            mass: 0.55,
+                            delay: reducedMotion ? 0 : charIdx * 0.024,
+                          }}
+                          style={{
+                            display: 'inline-block',
+                            transformStyle: 'preserve-3d',
+                            transformOrigin: '50% 50% -32px',
+                            backfaceVisibility: 'hidden',
+                            WebkitFontSmoothing: 'antialiased',
+                            fontSize: 'clamp(2rem, 3.8vw, 3.15rem)',
+                            lineHeight: 1.15,
+                            transform: 'translateZ(20px)',
+                          }}
+                          className={`text-white tracking-[0.03em] transition-shadow duration-300 ${
+                            isHovered
+                              ? 'drop-shadow-[0_2px_18px_rgba(0,0,0,0.95)] drop-shadow-[0_0_24px_rgba(0,217,255,0.6)]'
+                              : 'drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] drop-shadow-[0_0_15px_rgba(0,217,255,0.3)]'
+                          }`}
+                        >
+                          {char}
+                        </motion.span>
+                      )
+                    })}
                   </motion.div>
                 </AnimatePresence>
               </h1>
