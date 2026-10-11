@@ -3,7 +3,7 @@ import { academicTimeline } from '../data/academic'
 import { PageTransition } from '../components/PageTransition'
 import { useRef } from 'react'
 
-export function About() {
+export function AboutPage() {
     const timelineRef = useRef<HTMLDivElement>(null)
     const reducedMotion = useReducedMotion()
     const { scrollYProgress } = useScroll({

@@ -8,8 +8,8 @@ import { LoadingScreen } from './components/LoadingScreen'
 import { Navbar } from './components/Navbar'
 import { SpaceBackground } from './components/backgrounds/SpaceBackground'
 
-import { Home } from './pages/Home'
-import { About } from './pages/About'
+import { HomePage } from './pages/HomePage'
+import { AboutPage } from './pages/AboutPage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { SkillsPage } from './pages/SkillsPage'
 import { AchievementsPage } from './pages/AchievementsPage'
@@ -68,8 +68,8 @@ export default function App() {
           <Navbar />
 
           <main className="flex flex-col w-full">
-            <Home />
-            <About />
+            <HomePage />
+            <AboutPage />
             <ProjectsPage />
             <SkillsPage />
             <AchievementsPage />

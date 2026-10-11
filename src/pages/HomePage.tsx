@@ -15,7 +15,7 @@ const ROLES = [
   'FULL STACK DEVELOPER',
 ] as const
 
-export function Home() {
+export function HomePage() {
   const [warpSpeed, setWarpSpeed] = useState(false)
   const [roleIndex, setRoleIndex] = useState(0)
   const cardRef = useRef<HTMLDivElement>(null)
