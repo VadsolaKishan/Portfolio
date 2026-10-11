@@ -13,10 +13,12 @@ export const chatProfile: ChatProfile = {
   education:
     'B.Tech Computer Engineering (ongoing). Focus on DSA, OS, DBMS, Computer Networks, Software Engineering, and Machine Learning.',
   resumeUrl: '/resume.pdf',
-  contactEmail: 'you@example.com',
+  contactEmail: 'vadsolakishan1310@gmail.com',
   links: [
-    { label: 'GitHub', url: '#' },
-    { label: 'LinkedIn', url: '#' },
-    { label: 'Portfolio Repo', url: '#' },
+    { label: 'GitHub', url: 'https://github.com/VadsolaKishan' },
+    {
+      label: 'LinkedIn',
+      url: 'https://www.linkedin.com/in/kishan-vadsola-a68b05331/',
+    },
   ],
 }

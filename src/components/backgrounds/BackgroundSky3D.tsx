@@ -2,64 +2,116 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useInView } from 'framer-motion'
 import { Points, PointMaterial } from '@react-three/drei'
 import * as THREE from 'three'
-import { useState, useRef } from 'react'
+import { useRef, useMemo, useEffect } from 'react'
+
+const STAR_COUNT = 1200
+const Z_NEAR = 1.4
+const Z_FAR = -25.0
+const DEPTH = Z_NEAR - Z_FAR
+const SPREAD = 24.0
 
 function Sky({ warpSpeed = false }: { warpSpeed?: boolean }) {
-    const ref = useRef<THREE.Points>(null!)
-    const [sphere] = useState(() => {
-        const arr = new Float32Array(5000 * 3)
-        for (let i = 0; i < 5000; i++) {
-            const x = (Math.random() - 0.5) * 20
-            const y = (Math.random() - 0.5) * 20
-            const z = (Math.random() - 0.5) * 20
-            arr[i * 3] = x
-            arr[i * 3 + 1] = y
-            arr[i * 3 + 2] = z
-        }
-        return arr
-    })
+  const pointsRef = useRef<THREE.Points>(null!)
+  const groupRef = useRef<THREE.Group>(null!)
+  const speedRef = useRef(0.65)
+  const mouseRef = useRef({ x: 0, y: 0 })
 
-    useFrame((_state, delta) => {
-        if (ref.current) {
-            if (warpSpeed) {
-                ref.current.position.z += delta * 15
-                if (ref.current.position.z > 10) ref.current.position.z = 0
-            } else {
-                ref.current.rotation.x -= delta / 15
-                ref.current.rotation.y -= delta / 20
-                ref.current.position.z += delta * 0.5
-                if (ref.current.position.z > 10) ref.current.position.z = 0
-            }
-        }
-    })
+  // Initialize star positions uniformly distributed across the depth volume
+  const positions = useMemo(() => {
+    const arr = new Float32Array(STAR_COUNT * 3)
+    for (let i = 0; i < STAR_COUNT; i++) {
+      arr[i * 3] = (Math.random() - 0.5) * SPREAD
+      arr[i * 3 + 1] = (Math.random() - 0.5) * SPREAD
+      arr[i * 3 + 2] = Z_FAR + Math.random() * DEPTH
+    }
+    return arr
+  }, [])
 
-    return (
-        <group rotation={[0, 0, Math.PI / 4]}>
-            <Points ref={ref} positions={sphere} stride={3} frustumCulled={false}>
-                <PointMaterial
-                    transparent
-                    color="#ffffff"
-                    size={0.05}
-                    sizeAttenuation={true}
-                    depthWrite={false}
-                />
-            </Points>
-        </group>
-    )
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mouseRef.current.x = (e.clientX / window.innerWidth - 0.5) * 0.15
+      mouseRef.current.y = (e.clientY / window.innerHeight - 0.5) * 0.15
+    }
+    window.addEventListener('mousemove', onMove, { passive: true })
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  useFrame((_state, delta) => {
+    const posAttr = pointsRef.current?.geometry?.attributes?.position
+    if (!posAttr) return
+
+    // Clamp delta to protect against tab suspension or frame drops
+    const safeDelta = Math.min(delta, 0.05)
+
+    // Smooth speed interpolation for normal flight vs warp speed
+    const targetSpeed = warpSpeed ? 32 : 0.65
+    speedRef.current = THREE.MathUtils.lerp(speedRef.current, targetSpeed, safeDelta * 4)
+
+    const step = speedRef.current * safeDelta
+    const arr = posAttr.array as Float32Array
+
+    // Seamless continuous flight: wrap each star individually when it passes camera
+    for (let i = 0; i < STAR_COUNT; i++) {
+      const zIdx = i * 3 + 2
+      arr[zIdx] += step
+
+      if (arr[zIdx] > Z_NEAR) {
+        arr[zIdx] -= DEPTH
+        arr[i * 3] = (Math.random() - 0.5) * SPREAD
+        arr[i * 3 + 1] = (Math.random() - 0.5) * SPREAD
+      }
+    }
+    posAttr.needsUpdate = true
+
+    // Continuous smooth roll & subtle mouse parallax (never jumps, never stops)
+    if (groupRef.current) {
+      groupRef.current.rotation.z += safeDelta * 0.02
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(
+        groupRef.current.rotation.x,
+        mouseRef.current.y,
+        0.04
+      )
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(
+        groupRef.current.rotation.y,
+        mouseRef.current.x,
+        0.04
+      )
+    }
+  })
+
+  return (
+    <group ref={groupRef} rotation={[0, 0, Math.PI / 4]}>
+      <Points ref={pointsRef} positions={positions} stride={3} frustumCulled={false}>
+        <PointMaterial
+          transparent
+          color="#ffffff"
+          size={0.032}
+          sizeAttenuation={true}
+          depthWrite={false}
+          opacity={0.88}
+        />
+      </Points>
+    </group>
+  )
 }
-
 
 export function BackgroundSky3D({ warpSpeed = false }: { warpSpeed?: boolean }) {
-    const ref = useRef(null)
-    const isInView = useInView(ref, { margin: "0px" })
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { margin: "500px" })
 
-    return (
-        <div ref={ref} className="absolute inset-0 -z-10 bg-black overflow-hidden pointer-events-none">
-            <div className="sticky top-0 h-screen w-full">
-                <Canvas camera={{ position: [0, 0, 1] }} frameloop={isInView ? "always" : "demand"}>
-                    <Sky warpSpeed={warpSpeed} />
-                </Canvas>
-            </div>
-        </div>
-    )
+  return (
+    <div ref={ref} className="absolute inset-0 -z-10 bg-black overflow-hidden pointer-events-none">
+      <div className="sticky top-0 h-screen w-full">
+        <Canvas
+          camera={{ position: [0, 0, 1], fov: 75 }}
+          frameloop={isInView ? "always" : "demand"}
+          dpr={[1, 1.5]}
+          gl={{ antialias: false, powerPreference: 'high-performance' }}
+        >
+          <Sky warpSpeed={warpSpeed} />
+        </Canvas>
+      </div>
+    </div>
+  )
 }
+

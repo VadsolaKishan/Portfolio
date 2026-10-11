@@ -1,27 +1,24 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { useInView } from 'framer-motion'
 import * as THREE from 'three'
 
 function OrbitScene() {
-    const ringsRef = useRef<THREE.Group>(null!)
     const coreRef = useRef<THREE.Mesh>(null!)
+    const ringsRef = useRef<THREE.Group>(null!)
 
-    useFrame((state, delta) => {
+    useFrame((_, delta) => {
+        if (coreRef.current) {
+            coreRef.current.rotation.y += delta * 0.2
+        }
         if (ringsRef.current) {
             ringsRef.current.rotation.x += delta * 0.1
-            ringsRef.current.rotation.y += delta * 0.2
-        }
-        if (coreRef.current) {
-            coreRef.current.rotation.y += delta;
-            const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.1
-            coreRef.current.scale.set(scale, scale, scale)
+            ringsRef.current.rotation.y += delta * 0.15
         }
     })
 
     return (
         <>
-            <color attach="background" args={['#000000']} />
             <ambientLight intensity={0.2} />
             <pointLight position={[0, 0, 0]} intensity={20} color="#a855f7" distance={10} />
 
@@ -44,20 +41,17 @@ function OrbitScene() {
     )
 }
 
-
 export function BackgroundOrbit() {
     const ref = useRef(null)
     const isInView = useInView(ref, { margin: "0px" })
 
     return (
-        <div ref={ref} className="absolute inset-0 -z-10 bg-black overflow-hidden pointer-events-none">
+        <div ref={ref} className="absolute inset-0 -z-10 bg-transparent overflow-hidden pointer-events-none">
             <div className="sticky top-0 h-screen w-full">
-                <Canvas camera={{ position: [0, 5, 10] }} frameloop={isInView ? "always" : "demand"}>
+                <Canvas camera={{ position: [0, 5, 10] }} gl={{ alpha: true }} frameloop={isInView ? "always" : "demand"}>
                     <OrbitScene />
                 </Canvas>
             </div>
-
-            <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(rgba(255,255,255,0.22)_2px,transparent_2px)] [background-size:40px_40px]" />
         </div>
     )
 }

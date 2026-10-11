@@ -6,6 +6,7 @@ import { Chatbot } from './components/Chatbot'
 import { CursorGlow } from './components/CursorGlow'
 import { LoadingScreen } from './components/LoadingScreen'
 import { Navbar } from './components/Navbar'
+import { SpaceBackground } from './components/backgrounds/SpaceBackground'
 
 import { Home } from './pages/Home'
 import { About } from './pages/About'
@@ -41,7 +42,14 @@ export default function App() {
   }, [])
 
   return (
-    <div className="relative bg-black text-slate-50 selection:bg-cyan-500/30 font-sans">
+    <div
+      className="relative text-zinc-100 selection:bg-cyan-500/20 min-h-screen"
+      style={{ background: '#020204', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}
+    >
+      {/* Persistent 5-Layer 3D Anti-Gravity Space Background */}
+      <SpaceBackground />
+
+      {/* Subtle Cursor Follow Glow */}
       <CursorGlow />
 
       <AnimatePresence mode="wait">

@@ -12,7 +12,7 @@ export const projects: Project[] = [
     tech: ['Django', 'React', 'Neon PostgreSQL'],
     description:
       'Role-based dashboards, patient records, appointment workflows, and secure data access patterns.',
-    liveUrl: 'https://clinic-frontend-loqq.onrender.com',
+    liveUrl: 'https://hms-lemon-ten.vercel.app',
     githubUrl: 'https://github.com/VadsolaKishan/Hospital_Management_System',
   },
   {

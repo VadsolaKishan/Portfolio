@@ -1,5 +1,4 @@
 import { motion, useReducedMotion, useScroll, useSpring } from 'framer-motion'
-import { BackgroundGrid } from '../components/backgrounds/BackgroundGrid'
 import { academicTimeline } from '../data/academic'
 import { PageTransition } from '../components/PageTransition'
 import { useRef } from 'react'
@@ -15,7 +14,11 @@ export function About() {
 
     return (
         <PageTransition id="about">
-            <BackgroundGrid />
+            <div className="absolute inset-0 -z-10 bg-transparent overflow-hidden pointer-events-none">
+                <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(rgba(255,255,255,0.2)_1.5px,transparent_1.5px)] [background-size:36px_36px]" />
+                <div className="absolute -top-24 left-1/2 h-[min(30rem,90vw)] w-[min(30rem,90vw)] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-[140px]" />
+                <div className="absolute -bottom-40 left-1/4 h-[min(32rem,92vw)] w-[min(32rem,92vw)] rounded-full bg-blue-500/10 blur-[160px]" />
+            </div>
             <div className="flex flex-col items-center justify-center w-full min-h-screen py-20 sm:py-24 px-4 relative z-10">
                 <div className="max-w-5xl w-full">
                     <motion.div

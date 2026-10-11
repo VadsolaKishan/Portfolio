@@ -1,237 +1,246 @@
-import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 
 type Props = {
   onDone: () => void
 }
 
-const codeLines = [
-  'INIT::SECURE_CHANNEL()',
-  'SCAN::BIOMETRIC_MATCH(OK)',
-  'VERIFY::TOKEN_SIGNATURE...',
-  'DECRYPT::PROFILE_PAYLOAD()',
-]
+const particlesArray = [...Array(30)].map(() => ({
+  width: Math.random() * 2 + 1 + 'px',
+  height: Math.random() * 2 + 1 + 'px',
+  top: Math.random() * 100 + '%',
+  left: Math.random() * 100 + '%',
+  duration: Math.random() * 4 + 3,
+  delay: Math.random() * 2,
+}))
+
+const orbitParticlesArray = [...Array(15)].map(() => ({
+  angle: Math.random() * 360,
+  radius: Math.random() * 50 + 110,
+  size: Math.random() * 2 + 1 + 'px',
+}))
+
+const dataFragmentsArray = [...Array(12)].map(() => ({
+  top: Math.random() * 100 + '%',
+  left: Math.random() * 100 + '%',
+  delay: Math.random() * 2,
+  duration: Math.random() * 3 + 2,
+  text: ['01', '10', '++', '//', '<>', '{}'][Math.floor(Math.random() * 6)]
+}))
 
 export function LoadingScreen({ onDone }: Props) {
-  const [unlocking, setUnlocking] = useState(false)
-  const [lines, setLines] = useState<string[]>([])
-  const reducedMotion = useReducedMotion()
-  const unlockButtonRef = useRef<HTMLButtonElement | null>(null)
-
   useEffect(() => {
-    if (unlocking) return
-    unlockButtonRef.current?.focus()
-  }, [unlocking])
+    const timer = setTimeout(() => {
+      onDone()
+    }, 2400)
 
-  useEffect(() => {
-    if (!unlocking) return
-    let index = 0
-    const interval = setInterval(() => {
-      setLines((prev) => [...prev, codeLines[index]])
-      index++
-      if (index === codeLines.length) {
-        clearInterval(interval)
-        setTimeout(() => {
-          onDone()
-        }, 800)
-      }
-    }, 250)
-    return () => clearInterval(interval)
-  }, [unlocking, onDone])
+    const handleKey = () => onDone()
+    window.addEventListener('keydown', handleKey)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('keydown', handleKey)
+    }
+  }, [onDone])
+
+  const particles = particlesArray;
+  const orbitParticles = orbitParticlesArray;
+  const dataFragments = dataFragmentsArray;
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000] overflow-hidden cursor-pointer"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
       role="dialog"
       aria-modal="true"
-      aria-label={unlocking ? 'Decrypting secure portfolio session' : 'Secure portfolio access'}
+      aria-label="Quantum Access Engaged"
     >
+      {/* Faint Grid Distortion */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_70%_65%,rgba(168,85,247,0.14),transparent_55%)]" />
-        <div className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:72px_72px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,1)_70%)]" />
+        <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,#f8fafc_1px,transparent_1px),linear-gradient(to_bottom,#f8fafc_1px,transparent_1px)] [background-size:64px_64px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_80%)]" />
       </div>
 
-      {!unlocking ? (
+      {/* Deep Glow Accents */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute w-[800px] h-[800px] bg-[#00f5ff]/5 blur-[150px] rounded-full" />
+        <div className="absolute w-[600px] h-[600px] bg-[#6d28d9]/10 blur-[120px] rounded-full" />
+      </div>
+
+      {/* Background Particles & Data Fragments */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {particles.map((p, i) => (
+          <motion.div
+            key={`p-${i}`}
+            className="absolute rounded-full bg-white/20"
+            style={{
+              width: p.width,
+              height: p.height,
+              top: p.top,
+              left: p.left,
+            }}
+            animate={{
+              y: [0, -40, 0],
+              opacity: [0, 0.4, 0],
+              scale: [0.8, 1.2, 0.8],
+            }}
+            transition={{
+              duration: p.duration,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: p.delay,
+            }}
+          />
+        ))}
+        {dataFragments.map((d, i) => (
+          <motion.div
+            key={`d-${i}`}
+            className="absolute text-[#00f5ff]/20 text-xs font-mono"
+            style={{ top: d.top, left: d.left }}
+            animate={{
+              opacity: [0, 0.6, 0],
+              y: [0, -20, 0],
+            }}
+            transition={{
+              duration: d.duration,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: d.delay,
+            }}
+          >
+            {d.text}
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Central Glassmorphism Container */}
+      <div className="relative z-10 flex flex-col items-center justify-center">
+        <div className="relative flex items-center justify-center w-[340px] h-[340px] mb-12">
+
+          {/* Outer Soft Pulse */}
+          <motion.div
+            className="absolute inset-0 rounded-full bg-[#00f5ff]/5"
+            animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0, 0.3] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          />
+
+          {/* Quantum Core Rings */}
+          {/* Ring 1 (Outer) - Violet */}
+          <motion.div
+            className="absolute inset-4 rounded-full border border-[#6d28d9]/30 border-dashed"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+          />
+
+          {/* Ring 2 - Cyan Solid Thin */}
+          <motion.div
+            className="absolute inset-8 rounded-full border-[0.5px] border-[#00f5ff]/30"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+          >
+            {/* Orbiting Gold Accent */}
+            <div className="absolute -top-1 left-1/2 w-2 h-2 -translate-x-1/2 bg-[#facc15] rounded-full shadow-[0_0_12px_#facc15]" />
+          </motion.div>
+
+          {/* Ring 3 - Violet Dotted */}
+          <motion.div
+            className="absolute inset-[60px] rounded-full border-[2px] border-[#6d28d9]/20 group"
+            style={{ borderStyle: 'dotted' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+          />
+
+          {/* Ring 4 - Inner Cyan */}
+          <motion.div
+            className="absolute inset-[84px] rounded-full border-[0.5px] border-[#00f5ff]/50"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+            style={{ boxShadow: '0 0 20px rgba(0, 245, 255, 0.15) inset' }}
+          >
+            <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 -translate-x-1/2 translate-y-1/2 bg-[#00f5ff] rounded-full shadow-[0_0_10px_#00f5ff]" />
+          </motion.div>
+
+          {/* Central Vault (Glassmorphism) */}
+          <motion.div
+            className="absolute inset-[100px] rounded-full bg-black/60 backdrop-blur-xl border border-white/5 flex items-center justify-center overflow-hidden"
+            style={{ boxShadow: '0 0 40px rgba(109, 40, 217, 0.4)' }}
+          >
+            {/* Inner Glow */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-br from-[#6d28d9]/20 via-transparent to-[#00f5ff]/20"
+              animate={{ opacity: [0.5, 0.9, 0.5] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            />
+
+            {/* Pulsing Core */}
+            <motion.div
+              className="w-10 h-10 rounded-full bg-[#00f5ff] shadow-[0_0_25px_#00f5ff,0_0_50px_#00f5ff]"
+              animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.8, 1, 0.8] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+
+            {/* Razor Sharp Scanning Beam */}
+            <motion.div
+              className="absolute left-0 right-0 h-full w-full flex flex-col justify-end"
+              initial={{ y: '-100%' }}
+              animate={{ y: '100%' }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+            >
+              <div className="h-[150%] w-full bg-gradient-to-b from-transparent via-[#00f5ff]/10 to-transparent" />
+              <div className="h-[2px] w-full bg-[#00f5ff] shadow-[0_0_12px_#00f5ff]" />
+            </motion.div>
+          </motion.div>
+
+          {/* Orbiting Micro Light Particles */}
+          <motion.div
+            className="absolute inset-0"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
+          >
+            {orbitParticles.map((p, i) => (
+              <div
+                key={`o-${i}`}
+                className="absolute top-1/2 left-1/2 rounded-full bg-[#00f5ff] shadow-[0_0_8px_#00f5ff]"
+                style={{
+                  width: p.size,
+                  height: p.size,
+                  marginTop: `-${parseFloat(p.size) / 2}px`,
+                  marginLeft: `-${parseFloat(p.size) / 2}px`,
+                  transform: `rotate(${p.angle}deg) translateX(${p.radius}px)`,
+                }}
+              />
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Typography */}
         <motion.div
-          className="relative z-10 mx-auto w-[min(560px,92vw)]"
-          initial={{ scale: 0.96, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.55, ease: 'easeOut' }}
+          className="flex flex-col items-center z-20"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
         >
-          <div className="rounded-3xl bg-gradient-to-r from-cyan-400/30 via-white/10 to-fuchsia-400/25 p-[1px] shadow-[0_0_60px_rgba(34,211,238,0.10)]">
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/65 backdrop-blur-md">
-              <div className="absolute inset-0 opacity-[0.22] bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.22),transparent_55%),radial-gradient(circle_at_80%_75%,rgba(168,85,247,0.16),transparent_55%)]" />
-
-              <div className="relative px-6 py-7 sm:px-10 sm:py-9 text-center">
-                <p className="text-base sm:text-lg font-bold tracking-tight text-white">
-                  KISHAN VADSOLA
-                </p>
-                <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-300/80">
-                  Secure Portfolio Gateway
-                </p>
-
-                <div className="mt-4 flex items-center justify-center gap-2">
-                  <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200/90">
-                    Encrypted Session
-                  </span>
-                  <span className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold text-cyan-100/90">
-                    Integrity Check
-                  </span>
-                </div>
-
-                <div className="relative mx-auto mt-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-[0_0_30px_rgba(34,211,238,0.12)]">
-                  <div
-                    aria-hidden="true"
-                    className="absolute -z-10 h-24 w-24 rounded-full blur-2xl"
-                    style={{
-                      background:
-                        'radial-gradient(circle at 35% 35%, rgba(34,211,238,0.35), transparent 55%), radial-gradient(circle at 65% 60%, rgba(168,85,247,0.25), transparent 55%)',
-                      mixBlendMode: 'screen',
-                    }}
-                  />
-
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="h-8 w-8 text-cyan-300"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                </div>
-
-                <h1 className="mt-6 text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                  Access Required
-                </h1>
-                <p className="mt-2 text-sm text-slate-300/80">
-                  Unlock a secure session to view the portfolio experience.
-                </p>
-
-                <div className="mt-7 flex items-center justify-center gap-3">
-                  <button
-                    ref={unlockButtonRef}
-                    type="button"
-                    onClick={() => setUnlocking(true)}
-                    className="group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-cyan-400/30 bg-cyan-500/10 px-8 py-3 text-sm font-semibold text-cyan-50 shadow-[0_0_18px_rgba(34,211,238,0.10)] transition-all hover:bg-cyan-500/20 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                  >
-                    <span className="relative z-10 tracking-[0.18em] uppercase">
-                      Enter Portfolio
-                    </span>
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-0 -translate-x-full bg-[linear-gradient(110deg,transparent,rgba(255,255,255,0.16),transparent)] group-hover:animate-shimmer"
-                    />
-                  </button>
-                </div>
-
-              </div>
+          <div className="text-center font-sans">
+            <h2 className="text-[#f8fafc] text-xl sm:text-2xl font-light tracking-[0.25em] uppercase drop-shadow-[0_0_10px_rgba(248,250,252,0.3)]">
+              Quantum Access Engaged
+            </h2>
+            <div className="text-xs sm:text-sm tracking-[0.2em] text-[#6d28d9] flex justify-center items-center mt-4 opacity-80 uppercase font-medium">
+              Authenticating Neural Signature
+              <motion.span
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, times: [0, 0.5, 1] }}
+                className="ml-1 text-[#00f5ff]"
+              >
+                ...
+              </motion.span>
             </div>
+            <p className="mt-3 text-[11px] font-mono tracking-widest text-zinc-500 uppercase">
+              Click anywhere to bypass
+            </p>
           </div>
         </motion.div>
-      ) : (
-        <motion.div
-          className="relative z-10 mx-auto w-[min(640px,92vw)]"
-          initial={{ scale: 0.96, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.55, ease: 'easeOut' }}
-        >
-          <div className="rounded-3xl bg-gradient-to-r from-cyan-400/30 via-white/10 to-fuchsia-400/25 p-[1px] shadow-[0_0_60px_rgba(34,211,238,0.10)]">
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/65 backdrop-blur-md">
-              <div className="absolute inset-0 opacity-[0.20] bg-[radial-gradient(circle_at_25%_25%,rgba(34,211,238,0.22),transparent_55%),radial-gradient(circle_at_85%_70%,rgba(168,85,247,0.15),transparent_55%)]" />
-
-              <div className="relative px-6 py-7 sm:px-10 sm:py-9">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-[0_0_26px_rgba(34,211,238,0.12)]">
-                      <motion.svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        className="h-6 w-6 text-cyan-300"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        {...(!reducedMotion
-                          ? {
-                            animate: { rotate: 360 },
-                            transition: { duration: 2.2, repeat: Infinity, ease: 'linear' },
-                          }
-                          : {})}
-                      >
-                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                      </motion.svg>
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-300/80">
-                        KISHAN VADSOLA · Secure Session
-                      </p>
-                      <h1 className="mt-2 text-xl sm:text-2xl font-bold tracking-tight text-white">
-                        Initializing Portfolio
-                      </h1>
-                      <p className="mt-1 text-xs text-slate-300/80 uppercase tracking-[0.25em]">
-                        Verifying integrity · Decrypting content
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="hidden sm:block text-right">
-                    <p className="text-xs text-slate-400/80">Status</p>
-                    <p className="text-sm font-semibold text-slate-200">Secure Handshake</p>
-                  </div>
-                </div>
-
-                <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-white/5">
-                  <motion.div
-                    className="h-full w-full origin-left rounded-full bg-gradient-to-r from-cyan-400/70 to-fuchsia-400/60"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: Math.min(1, lines.length / codeLines.length) }}
-                    transition={reducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
-                  />
-                </div>
-
-                <div className="mt-6 rounded-2xl border border-white/10 bg-black/40 p-4 sm:p-5">
-                  <div className="font-mono text-[13px] leading-6 text-cyan-200 min-h-[140px]" aria-live="polite" aria-atomic="false">
-                    {lines.map((l, i) => (
-                      <motion.div
-                        key={i}
-                        {...(!reducedMotion
-                          ? {
-                            initial: { opacity: 0, x: -10 },
-                            animate: { opacity: 1, x: 0 },
-                          }
-                          : {})}
-                        className="mb-1"
-                      >
-                        <span className="text-slate-400">&gt;</span> {l}
-                      </motion.div>
-                    ))}
-
-                    {lines.length === codeLines.length && (
-                      <motion.div
-                        {...(!reducedMotion
-                          ? {
-                            initial: { opacity: 0 },
-                            animate: { opacity: 1 },
-                            transition: { delay: 0.15 },
-                          }
-                          : {})}
-                        className="mt-3 font-semibold text-emerald-300"
-                      >
-                        <span className="text-slate-400">&gt;</span> ACCESS GRANTED
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      </div>
     </motion.div>
   )
 }
