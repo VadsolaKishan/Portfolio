@@ -13,6 +13,8 @@ import { PageTransition } from '../components/PageTransition'
 
 const ROLES = [
   'FULL STACK DEVELOPER',
+  'AI ENGINEER',
+  'SOFTWARE ENGINEER',
 ] as const
 
 export function HomePage() {
@@ -55,12 +57,11 @@ export function HomePage() {
     return () => window.removeEventListener('resize', measure)
   }, [])
 
-  // Switch roles smoothly if multiple roles exist
+  // Switch roles smoothly every 3.5 seconds
   useEffect(() => {
-    if (ROLES.length <= 1) return
     const timer = setInterval(() => {
       setRoleIndex((prev) => (prev + 1) % ROLES.length)
-    }, 3800)
+    }, 3500)
     return () => clearInterval(timer)
   }, [])
 
@@ -110,7 +111,6 @@ export function HomePage() {
   }
 
   const customEase = [0.16, 1, 0.3, 1] as const
-  const smoothEase = [0.25, 0.1, 0.25, 1] as const
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -190,13 +190,27 @@ export function HomePage() {
             className="relative self-start"
             style={{ perspective: 1200 }}
           >
-            {/* Ambient cyan underglow with reduced corners */}
-            <div
-              className="absolute -inset-1 rounded-xl sm:rounded-2xl bg-cyan-500/20 blur-xl opacity-75 pointer-events-none"
+            {/* Ambient cyan underglow synchronized with card width */}
+            <motion.div
+              animate={{
+                width:
+                  roleWidths[roleIndex] !== undefined
+                    ? roleWidths[roleIndex] + paddingOffset
+                    : 'auto',
+              }}
+              transition={{
+                width: {
+                  type: 'spring',
+                  stiffness: 110,
+                  damping: 18,
+                  mass: 0.9,
+                },
+              }}
+              className="absolute -inset-1 rounded-xl sm:rounded-2xl bg-cyan-500/20 blur-xl opacity-75 pointer-events-none origin-left"
               aria-hidden="true"
             />
 
-            {/* Dark Card Container: Animated width directly ensures corners never distort or warp */}
+            {/* Dark Card Container: Spring-animated width glides right side smoothly in and out */}
             <motion.div
               ref={cardRef}
               animate={{
@@ -207,8 +221,10 @@ export function HomePage() {
               }}
               transition={{
                 width: {
-                  duration: 0.82,
-                  ease: smoothEase,
+                  type: 'spring',
+                  stiffness: 110,
+                  damping: 18,
+                  mass: 0.9,
                 },
               }}
               onMouseMove={handleMouseMove}
@@ -224,13 +240,13 @@ export function HomePage() {
                     transformStyle: 'preserve-3d',
                   }),
               }}
-              className="relative inline-flex items-center justify-center text-center self-start min-h-[108px] sm:min-h-[120px] md:min-h-[132px] px-8 sm:px-10 md:px-12 py-6 sm:py-7 md:py-8 border border-cyan-400/25 hover:border-cyan-400/45 rounded-xl sm:rounded-2xl bg-black/85 backdrop-blur-2xl shadow-[0_12px_44px_rgba(0,0,0,0.85),0_0_28px_rgba(0,217,255,0.08),inset_0_1px_1px_rgba(255,255,255,0.15)] transition-colors duration-300 select-none overflow-hidden origin-left"
+              className="relative inline-flex items-center justify-center text-center self-start min-h-[108px] sm:min-h-[120px] md:min-h-[132px] px-8 sm:px-10 md:px-12 py-6 sm:py-7 md:py-8 border border-cyan-400/25 hover:border-cyan-400/50 rounded-xl sm:rounded-2xl bg-black/85 backdrop-blur-2xl shadow-[0_12px_44px_rgba(0,0,0,0.85),0_0_28px_rgba(0,217,255,0.08),inset_0_1px_1px_rgba(255,255,255,0.15)] transition-colors duration-300 select-none overflow-hidden origin-left"
             >
-              {/* Dynamic specular light reflection following cursor */}
+              {/* Dynamic specular light reflection following cursor in 3D */}
               <div
                 className="absolute inset-0 pointer-events-none transition-opacity duration-300"
                 style={{
-                  background: `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0, 217, 255, 0.12), transparent 70%)`,
+                  background: `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0, 217, 255, 0.16), transparent 70%)`,
                   opacity: isHovered ? 1 : 0,
                 }}
                 aria-hidden="true"
@@ -240,15 +256,15 @@ export function HomePage() {
               <AnimatePresence mode="popLayout">
                 <motion.div
                   key={`shine-${roleIndex}`}
-                  initial={{ x: '-120%', opacity: 0 }}
-                  animate={{ x: '180%', opacity: [0, 0.45, 0] }}
-                  transition={{ duration: 1.0, delay: 0.15, ease: 'easeInOut' }}
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/15 to-transparent pointer-events-none -skew-x-12"
+                  initial={{ x: '-140%', opacity: 0 }}
+                  animate={{ x: '180%', opacity: [0, 0.55, 0] }}
+                  transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent pointer-events-none -skew-x-12"
                   aria-hidden="true"
                 />
               </AnimatePresence>
 
-              <h1 className="m-0 p-0 text-center relative flex items-center justify-center overflow-visible w-full">
+              <h1 className="m-0 p-0 text-center relative flex items-center justify-center overflow-visible w-full [transform-style:preserve-3d]">
                 <AnimatePresence mode="popLayout">
                   <motion.div
                     key={roleIndex}
@@ -257,35 +273,38 @@ export function HomePage() {
                         ? { opacity: 0 }
                         : {
                           opacity: 0,
-                          y: 32,
-                          rotateX: -65,
-                          z: -20,
+                          y: 38,
+                          rotateX: -70,
+                          z: -45,
+                          filter: 'blur(4px)',
                         }
                     }
                     animate={{
                       opacity: 1,
                       y: 0,
                       rotateX: 0,
-                      z: 0,
+                      z: 15,
+                      filter: 'blur(0px)',
                     }}
                     exit={
                       reducedMotion
                         ? { opacity: 0 }
                         : {
                           opacity: 0,
-                          y: -30,
-                          rotateX: 65,
-                          z: -20,
-                          transition: { duration: 0.38, ease: smoothEase },
+                          y: -38,
+                          rotateX: 70,
+                          z: -45,
+                          filter: 'blur(4px)',
+                          transition: { duration: 0.35, ease: 'easeIn' },
                         }
                     }
                     transition={{
-                      duration: reducedMotion ? 0.3 : 0.78,
-                      ease: smoothEase,
+                      duration: reducedMotion ? 0.3 : 0.72,
+                      ease: [0.22, 1, 0.36, 1],
                     }}
                     style={{
                       transformStyle: 'preserve-3d',
-                      transformOrigin: 'center center -25px',
+                      transformOrigin: 'center center -30px',
                       backfaceVisibility: 'hidden',
                       WebkitFontSmoothing: 'antialiased',
                     }}
@@ -296,6 +315,7 @@ export function HomePage() {
                       style={{
                         fontSize: 'clamp(2rem, 3.8vw, 3.15rem)',
                         lineHeight: 1.15,
+                        transform: 'translateZ(20px)',
                       }}
                     >
                       {ROLES[roleIndex]}
