@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, Fragment } from 'react'
 import {
   motion,
   AnimatePresence,
@@ -23,7 +23,7 @@ export function HomePage() {
   const cardRef = useRef<HTMLDivElement>(null)
   const sizerRef = useRef<HTMLDivElement>(null)
   const [roleWidths, setRoleWidths] = useState<number[]>([])
-  const [paddingOffset, setPaddingOffset] = useState(116)
+  const [paddingOffset, setPaddingOffset] = useState(72)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
   const reducedMotion = useReducedMotion()
@@ -39,9 +39,9 @@ export function HomePage() {
         setRoleWidths(widths)
       }
       const width = window.innerWidth
-      if (width < 640) setPaddingOffset(80)
-      else if (width < 768) setPaddingOffset(96)
-      else setPaddingOffset(116)
+      if (width < 640) setPaddingOffset(52)
+      else if (width < 768) setPaddingOffset(62)
+      else setPaddingOffset(72)
     }
 
     measure()
@@ -151,13 +151,18 @@ export function HomePage() {
         {ROLES.map((role, idx) => (
           <span
             key={idx}
-            className="inline-block font-heading font-bold uppercase whitespace-nowrap tracking-[0.03em]"
+            className="inline-flex items-center font-heading font-bold uppercase whitespace-nowrap tracking-[0.03em]"
             style={{
               fontSize: 'clamp(2rem, 3.8vw, 3.15rem)',
               lineHeight: 1.15,
             }}
           >
-            {role}
+            {role.split(' ').map((word, wIdx) => (
+              <Fragment key={wIdx}>
+                {wIdx > 0 && <span style={{ width: '0.32em' }}>&nbsp;</span>}
+                <span>{word}</span>
+              </Fragment>
+            ))}
           </span>
         ))}
       </div>
@@ -240,7 +245,7 @@ export function HomePage() {
                     transformStyle: 'preserve-3d',
                   }),
               }}
-              className="relative inline-flex items-center justify-center text-center self-start min-h-[108px] sm:min-h-[120px] md:min-h-[132px] px-8 sm:px-10 md:px-12 py-6 sm:py-7 md:py-8 border border-cyan-400/25 hover:border-cyan-400/50 rounded-xl sm:rounded-2xl bg-black/85 backdrop-blur-2xl shadow-[0_12px_44px_rgba(0,0,0,0.85),0_0_28px_rgba(0,217,255,0.08),inset_0_1px_1px_rgba(255,255,255,0.15)] transition-colors duration-300 select-none overflow-hidden origin-left"
+              className="relative inline-flex items-center justify-center text-center self-start min-h-[102px] sm:min-h-[114px] md:min-h-[126px] px-5 sm:px-6 md:px-7 py-5 sm:py-6 md:py-7 border border-cyan-400/25 hover:border-cyan-400/50 rounded-xl sm:rounded-2xl bg-black/85 backdrop-blur-2xl shadow-[0_12px_44px_rgba(0,0,0,0.85),0_0_28px_rgba(0,217,255,0.08),inset_0_1px_1px_rgba(255,255,255,0.15)] transition-colors duration-300 select-none overflow-hidden origin-left"
             >
               {/* Dynamic specular light reflection following cursor in 3D */}
               <div
@@ -277,83 +282,91 @@ export function HomePage() {
                       perspective: 1000,
                     }}
                   >
-                    {ROLES[roleIndex].split('').map((char, charIdx) => {
-                      if (char === ' ') {
-                        return (
-                          <span
-                            key={`space-${roleIndex}-${charIdx}`}
-                            className="inline-block"
-                            style={{ width: '0.34em' }}
-                          >
-                            {'\u00A0'}
-                          </span>
-                        )
-                      }
+                    {ROLES[roleIndex].split(' ').map((word, wordIdx, wordsArr) => {
+                      const charOffset = wordsArr.slice(0, wordIdx).join(' ').length + (wordIdx > 0 ? 1 : 0)
                       return (
-                        <motion.span
-                          key={`char-${roleIndex}-${charIdx}`}
-                          initial={
-                            reducedMotion
-                              ? { opacity: 0 }
-                              : {
-                                opacity: 0,
-                                y: 44,
-                                rotateX: -90,
-                                z: -40,
-                                scale: 0.85,
-                                filter: 'blur(4px)',
-                              }
-                          }
-                          animate={{
-                            opacity: 1,
-                            y: 0,
-                            rotateX: 0,
-                            z: 22,
-                            scale: 1,
-                            filter: 'blur(0px)',
-                          }}
-                          exit={
-                            reducedMotion
-                              ? { opacity: 0 }
-                              : {
-                                opacity: 0,
-                                y: -42,
-                                rotateX: 90,
-                                z: -40,
-                                scale: 0.85,
-                                filter: 'blur(4px)',
-                                transition: {
-                                  duration: 0.28,
-                                  delay: charIdx * 0.012,
-                                  ease: 'easeIn',
-                                },
-                              }
-                          }
-                          transition={{
-                            type: 'spring',
-                            stiffness: 135,
-                            damping: 14,
-                            mass: 0.55,
-                            delay: reducedMotion ? 0 : charIdx * 0.024,
-                          }}
-                          style={{
-                            display: 'inline-block',
-                            transformStyle: 'preserve-3d',
-                            transformOrigin: '50% 50% -32px',
-                            backfaceVisibility: 'hidden',
-                            WebkitFontSmoothing: 'antialiased',
-                            fontSize: 'clamp(2rem, 3.8vw, 3.15rem)',
-                            lineHeight: 1.15,
-                            transform: 'translateZ(20px)',
-                          }}
-                          className={`text-white tracking-[0.03em] transition-shadow duration-300 ${
-                            isHovered
-                              ? 'drop-shadow-[0_2px_18px_rgba(0,0,0,0.95)] drop-shadow-[0_0_24px_rgba(0,217,255,0.6)]'
-                              : 'drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] drop-shadow-[0_0_15px_rgba(0,217,255,0.3)]'
-                          }`}
-                        >
-                          {char}
-                        </motion.span>
+                        <Fragment key={`word-${roleIndex}-${wordIdx}`}>
+                          {wordIdx > 0 && (
+                            <span
+                              key={`space-${roleIndex}-${wordIdx}`}
+                              className="inline-block select-none"
+                              style={{ width: '0.32em' }}
+                              aria-hidden="true"
+                            >
+                              {'\u00A0'}
+                            </span>
+                          )}
+                          <span className="inline-flex items-center">
+                            {word.split('').map((char, cIdx) => {
+                              const charIdx = charOffset + cIdx
+                              return (
+                                <motion.span
+                                  key={`char-${roleIndex}-${wordIdx}-${cIdx}`}
+                                  initial={
+                                    reducedMotion
+                                      ? { opacity: 0 }
+                                      : {
+                                        opacity: 0,
+                                        y: 44,
+                                        rotateX: -90,
+                                        z: -40,
+                                        scale: 0.85,
+                                        filter: 'blur(4px)',
+                                      }
+                                  }
+                                  animate={{
+                                    opacity: 1,
+                                    y: 0,
+                                    rotateX: 0,
+                                    z: 22,
+                                    scale: 1,
+                                    filter: 'blur(0px)',
+                                  }}
+                                  exit={
+                                    reducedMotion
+                                      ? { opacity: 0 }
+                                      : {
+                                        opacity: 0,
+                                        y: -42,
+                                        rotateX: 90,
+                                        z: -40,
+                                        scale: 0.85,
+                                        filter: 'blur(4px)',
+                                        transition: {
+                                          duration: 0.28,
+                                          delay: charIdx * 0.012,
+                                          ease: 'easeIn',
+                                        },
+                                      }
+                                  }
+                                  transition={{
+                                    type: 'spring',
+                                    stiffness: 135,
+                                    damping: 14,
+                                    mass: 0.55,
+                                    delay: reducedMotion ? 0 : charIdx * 0.024,
+                                  }}
+                                  style={{
+                                    display: 'inline-block',
+                                    transformStyle: 'preserve-3d',
+                                    transformOrigin: '50% 50% -32px',
+                                    backfaceVisibility: 'hidden',
+                                    WebkitFontSmoothing: 'antialiased',
+                                    fontSize: 'clamp(2rem, 3.8vw, 3.15rem)',
+                                    lineHeight: 1.15,
+                                    transform: 'translateZ(20px)',
+                                  }}
+                                  className={`text-white tracking-[0.03em] transition-shadow duration-300 ${isHovered
+                                      ? 'drop-shadow-[0_2px_18px_rgba(0,0,0,0.95)] drop-shadow-[0_0_24px_rgba(0,217,255,0.6)]'
+                                      : 'drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)] drop-shadow-[0_0_15px_rgba(0,217,255,0.3)]'
+                                    }`}
+                                >
+                                  {char}
+                                </motion.span>
+                              )
+                            })}
+                          </span>
+                        </Fragment>
                       )
                     })}
                   </motion.div>

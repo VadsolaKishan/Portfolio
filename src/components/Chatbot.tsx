@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { FiSend, FiX } from 'react-icons/fi'
-import { FaRobot } from 'react-icons/fa'
+import { AiBrandLogo } from './AiBrandLogo'
 import { chatProfile } from '../data/chatbot'
 import { projects } from '../data/projects'
 import { skills } from '../data/skills'
@@ -274,6 +274,7 @@ function answer(input: string): BotReply {
 
 export function Chatbot() {
   const [open, setOpen] = useState(false)
+  const [isLauncherHovered, setIsLauncherHovered] = useState(false)
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<ChatMsg[]>(() => [
     {
@@ -304,6 +305,31 @@ export function Chatbot() {
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
   }, [messages.length, open])
 
+  // Isolate mouse wheel events so main page does not scroll while interacting with chat
+  useEffect(() => {
+    if (!open) return
+    const el = listRef.current
+    if (!el) return
+
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation()
+      const isScrollable = el.scrollHeight > el.clientHeight
+      if (!isScrollable) return
+
+      const atTop = el.scrollTop <= 0 && e.deltaY < 0
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1 && e.deltaY > 0
+
+      if (atTop || atBottom) {
+        e.preventDefault()
+      }
+    }
+
+    el.addEventListener('wheel', handleWheel, { passive: false })
+    return () => {
+      el.removeEventListener('wheel', handleWheel)
+    }
+  }, [open])
+
   const send = (text: string) => {
     const trimmed = text.trim()
     if (!trimmed) return
@@ -323,18 +349,113 @@ export function Chatbot() {
 
   return (
     <>
-      <button
+      <motion.button
         type="button"
         onClick={() => setOpen(true)}
-        className="group fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 flex h-13 w-13 items-center justify-center rounded-full border border-cyan-400/35 bg-[#08080c]/85 backdrop-blur-xl text-cyan-300 shadow-[0_0_24px_rgba(0,217,255,0.22)] transition-all duration-300 hover:scale-105 hover:border-cyan-400/70 hover:shadow-[0_0_36px_rgba(0,217,255,0.45)] hover:text-white active:scale-95 cursor-pointer"
+        onMouseEnter={() => setIsLauncherHovered(true)}
+        onMouseLeave={() => setIsLauncherHovered(false)}
+        whileHover={{ scale: 1.06, y: -2 }}
+        whileTap={{ scale: 0.94 }}
+        className="group fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 flex h-[66px] w-[66px] sm:h-[70px] sm:w-[70px] items-center justify-center rounded-full bg-black shadow-[0_12px_36px_rgba(0,0,0,0.95)] transition-all duration-300 cursor-pointer"
         aria-label="Open AI portfolio assistant"
       >
-        <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400" />
-        </span>
-        <FaRobot className="relative transition-transform duration-300 group-hover:scale-110" size={20} />
-      </button>
+        {/* Ring 1 (Outer Round): Precision Bezel Ring, Rotates CLOCKWISE */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Base Outer Guide Track */}
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <circle
+              cx="50"
+              cy="50"
+              r="47"
+              fill="none"
+              stroke="rgba(0,240,255,0.22)"
+              strokeWidth="1.2"
+            />
+          </svg>
+          {/* Active Spinning Clockwise Segment */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: isLauncherHovered ? 2.5 : 8,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+            className="absolute inset-0"
+          >
+            <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+              <defs>
+                <linearGradient id="outer-ring-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#00F0FF" />
+                  <stop offset="50%" stopColor="#38BDF8" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#0284C7" stopOpacity="0.2" />
+                </linearGradient>
+              </defs>
+              <circle
+                cx="50"
+                cy="50"
+                r="47"
+                fill="none"
+                stroke="url(#outer-ring-cyan)"
+                strokeWidth="2.2"
+                strokeDasharray="95 55"
+                strokeLinecap="round"
+              />
+              <circle cx="50" cy="3" r="2.2" fill="#FFFFFF" filter="drop-shadow(0 0 4px #00F0FF)" />
+            </svg>
+          </motion.div>
+        </div>
+
+        {/* Ring 2 (Inner Round): Concentric Counter-Bezel Ring, Rotates COUNTER-CLOCKWISE */}
+        <div className="absolute inset-[4.5px] pointer-events-none">
+          {/* Base Inner Guide Track */}
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <circle
+              cx="50"
+              cy="50"
+              r="46"
+              fill="none"
+              stroke="rgba(168,85,247,0.2)"
+              strokeWidth="1"
+            />
+          </svg>
+          {/* Active Spinning Counter-Clockwise Segment */}
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{
+              duration: isLauncherHovered ? 2.8 : 10,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+            className="absolute inset-0"
+          >
+            <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+              <defs>
+                <linearGradient id="inner-ring-dual" x1="100%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#C084FC" />
+                  <stop offset="45%" stopColor="#38BDF8" />
+                  <stop offset="100%" stopColor="#00F0FF" stopOpacity="0.25" />
+                </linearGradient>
+              </defs>
+              <circle
+                cx="50"
+                cy="50"
+                r="46"
+                fill="none"
+                stroke="url(#inner-ring-dual)"
+                strokeWidth="2"
+                strokeDasharray="55 40 30 35"
+                strokeLinecap="round"
+              />
+              <circle cx="50" cy="96" r="1.8" fill="#A5F3FC" filter="drop-shadow(0 0 3px #38BDF8)" />
+            </svg>
+          </motion.div>
+        </div>
+
+        {/* Solid Pure Black Core Disc */}
+        <div className="relative z-10 flex h-[48px] w-[48px] sm:h-[52px] sm:w-[52px] items-center justify-center rounded-full bg-black shadow-[inset_0_2px_6px_rgba(0,0,0,0.9)]">
+          <AiBrandLogo size={40} isHovered={isLauncherHovered} interactive={true} />
+        </div>
+      </motion.button>
 
       <AnimatePresence>
         {open ? (
@@ -343,36 +464,110 @@ export function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 18, scale: 0.98 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
+            data-lenis-prevent="true"
+            data-lenis-prevent-wheel="true"
+            data-lenis-prevent-touch="true"
+            onWheel={(e) => e.stopPropagation()}
             className="fixed z-50 flex w-auto flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#06060a]/92 backdrop-blur-2xl shadow-[0_24px_60px_-12px_rgba(0,0,0,0.9),0_0_30px_rgba(0,217,255,0.08)] left-3 right-3 bottom-3 top-20 sm:top-auto sm:left-auto sm:right-6 sm:bottom-6 sm:w-[min(420px,92vw)] sm:h-[min(640px,78svh)]"
             role="dialog"
             aria-label="AI Portfolio Assistant"
           >
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 bg-white/[0.02]">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg border border-cyan-400/30 bg-cyan-950/40 flex items-center justify-center text-cyan-300 shadow-[0_0_10px_rgba(0,217,255,0.2)]">
-                  <FaRobot size={15} />
+              <div className="flex items-center gap-3 min-w-0">
+                {/* Miniature Dual-Ring Bezel Matching Launcher */}
+                <div className="relative w-10 h-10 rounded-full bg-black flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(0,217,255,0.25)]">
+                  {/* Outer Clockwise Cyan Ring */}
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 7, repeat: Infinity, ease: 'linear' }}
+                    className="absolute inset-0 pointer-events-none"
+                  >
+                    <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="47"
+                        fill="none"
+                        stroke="rgba(0,240,255,0.22)"
+                        strokeWidth="1.5"
+                      />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="47"
+                        fill="none"
+                        stroke="#00F0FF"
+                        strokeWidth="2.4"
+                        strokeDasharray="90 60"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="50" cy="3" r="2.2" fill="#FFFFFF" filter="drop-shadow(0 0 3px #00F0FF)" />
+                    </svg>
+                  </motion.div>
+                  {/* Inner Counter-Clockwise Violet Ring */}
+                  <motion.div
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 9, repeat: Infinity, ease: 'linear' }}
+                    className="absolute inset-[3px] pointer-events-none"
+                  >
+                    <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="46"
+                        fill="none"
+                        stroke="#A855F7"
+                        strokeWidth="2"
+                        strokeDasharray="50 45"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="50" cy="96" r="1.8" fill="#A5F3FC" filter="drop-shadow(0 0 3px #38BDF8)" />
+                    </svg>
+                  </motion.div>
+                  {/* Solid Black Disc */}
+                  <div className="relative z-10 w-[28px] h-[28px] rounded-full bg-black flex items-center justify-center">
+                    <AiBrandLogo size={24} isHovered={false} interactive={false} />
+                  </div>
                 </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
+
+                {/* Header Text Details */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
                     <p className="text-xs font-bold tracking-wider text-cyan-300">
                       AI ASSISTANT
                     </p>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      ONLINE
+                    </span>
                   </div>
-                  <p className="text-xs text-zinc-400">{chatProfile.roleLine}</p>
+                  <p
+                    className="text-[11px] text-zinc-400 truncate max-w-[210px] sm:max-w-[270px] mt-0.5"
+                    title={chatProfile.roleLine}
+                  >
+                    {chatProfile.roleLine}
+                  </p>
                 </div>
               </div>
+
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 transition hover:bg-white/15 hover:text-white cursor-pointer"
+                className="grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-zinc-300 transition hover:bg-white/15 hover:text-white cursor-pointer flex-shrink-0 ml-2"
                 aria-label="Close chatbot"
               >
                 <FiX size={16} />
               </button>
             </div>
 
-            <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 sm:p-4 space-y-3">
+            <div
+              ref={listRef}
+              data-lenis-prevent="true"
+              data-lenis-prevent-wheel="true"
+              data-lenis-prevent-touch="true"
+              onWheel={(e) => e.stopPropagation()}
+              className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-4 space-y-3"
+            >
               <div className="grid gap-3">
                 {messages.map((m) => (
                   <div

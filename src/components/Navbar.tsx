@@ -98,9 +98,9 @@ export function Navbar() {
         animate={{
           maxWidth: scrolled ? '1060px' : '1380px',
           backgroundColor: scrolled ? 'rgba(8, 8, 12, 0.8)' : 'rgba(0, 0, 0, 0)',
-          borderColor: scrolled ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0)',
+          borderColor: scrolled ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)',
           boxShadow: scrolled
-            ? '0 20px 48px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.4)'
+            ? '0 20px 48px rgba(0, 0, 0, 0.8)'
             : '0 0 0 rgba(0, 0, 0, 0)',
           backdropFilter: scrolled ? 'blur(24px) saturate(180%)' : 'blur(0px)',
           paddingTop: scrolled ? '10px' : '10px',
