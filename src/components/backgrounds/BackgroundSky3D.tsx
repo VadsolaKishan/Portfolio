@@ -10,6 +10,16 @@ const Z_FAR = -25.0
 const DEPTH = Z_NEAR - Z_FAR
 const SPREAD = 24.0
 
+function mulberry32(seed: number) {
+  let s = seed
+  return () => {
+    s += 0x6d2b79f5
+    let t = Math.imul(s ^ (s >>> 15), 1 | s)
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
 function Sky({ warpSpeed = false }: { warpSpeed?: boolean }) {
   const pointsRef = useRef<THREE.Points>(null!)
   const groupRef = useRef<THREE.Group>(null!)
@@ -18,11 +28,12 @@ function Sky({ warpSpeed = false }: { warpSpeed?: boolean }) {
 
   // Initialize star positions uniformly distributed across the depth volume
   const positions = useMemo(() => {
+    const rng = mulberry32(42)
     const arr = new Float32Array(STAR_COUNT * 3)
     for (let i = 0; i < STAR_COUNT; i++) {
-      arr[i * 3] = (Math.random() - 0.5) * SPREAD
-      arr[i * 3 + 1] = (Math.random() - 0.5) * SPREAD
-      arr[i * 3 + 2] = Z_FAR + Math.random() * DEPTH
+      arr[i * 3] = (rng() - 0.5) * SPREAD
+      arr[i * 3 + 1] = (rng() - 0.5) * SPREAD
+      arr[i * 3 + 2] = Z_FAR + rng() * DEPTH
     }
     return arr
   }, [])
